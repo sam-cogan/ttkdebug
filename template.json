@@ -1,0 +1,119 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "redisName": {
+            "type": "string",
+            "metadata": {
+                "docs": "https://docs.microsoft.com/en-us/azure/templates/microsoft.cache/2019-07-01/redis"
+            }
+        },
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]"
+        },
+        "zones": {
+            "type": "array",
+            "defaultValue": [],
+            "metadata": {
+                "description": "A list of availability zones denoting where the resource needs to come from"
+            }
+        },
+        "redisConfiguration": {
+            "type": "object",
+            "defaultValue": {}
+        },
+        "enableNonSslPort": {
+            "type": "bool",
+            "defaultValue": false
+        },
+        "replicasPerMaster": {
+            "type": "int",
+            "defaultValue": 0
+        },
+        "tenantSettings": {
+            "type": "object",
+            "defaultValue": {}
+        },
+        "shardCount": {
+            "type": "int",
+            "defaultValue": 0
+        },
+        "minimumTlsVersion": {
+            "type": "string"
+        },
+        "skuName": {
+            "type": "string",
+            "allowedValues": [
+                "Basic",
+                "Standard",
+                "Premium"
+            ]
+        },
+        "skuFamily": {
+            "type": "string",
+            "allowedValues": [
+                "C",
+                "P"
+            ]
+        },
+        "skuCapacity": {
+            "type": "int",
+            "minValue": 0,
+            "maxValue": 6
+        },
+        "subnetId": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "The full resource ID of a subnet in a virtual network to deploy the Redis cache in. Example format: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/Microsoft.{NetworkClassicNetwork}/VirtualNetworks/vnet1/subnets/subnet1"
+            }
+        },
+        "staticIP": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "Static IP address. Required when deploying a Redis cache inside an existing Azure Virtual Network"
+            }
+        },
+        "tags": {
+            "type": "object",
+            "defaultValue": {
+            }
+        },
+        "shouldDeploy": {
+            "type": "bool",
+            "defaultValue": true
+        }
+    },
+    "functions": [],
+    "variables": {},
+    "resources": [
+        {
+            "condition": "[parameters('shouldDeploy')]",
+            "type": "Microsoft.Cache/redis",
+            "name": "[parameters('redisName')]",
+            "apiVersion": "2019-07-01",
+            "location": "[parameters('location')]",
+            "zones": "[if(not(empty(parameters('zones'))), parameters('zones'), json('null'))]",
+            "tags": "[parameters('tags')]",
+            "properties": {
+                "redisConfiguration": "[parameters('redisConfiguration')]",
+                "enableNonSslPort": "[parameters('enableNonSslPort')]",
+                "minimumTlsVersion": "[parameters('minimumTlsVersion')]",
+                "replicasPerMaster": "[if(equals(parameters('skuName'), 'Premium'), parameters('replicasPerMaster'), json('null'))]",
+                "shardCount": "[if(equals(parameters('skuName'), 'Premium'), parameters('shardCount'), json('null'))]",
+                "tenantSettings": "[parameters('tenantSettings')]",
+                "sku": {
+                    "name": "[parameters('skuName')]",
+                    "family": "[parameters('skuFamily')]",
+                    "capacity": "[parameters('skuCapacity')]"
+                },
+                "staticIP": "[if(not(empty(parameters('staticIP'))), parameters('staticIP'), json('null'))]",
+                "subnetId": "[if(not(empty(parameters('subnetId'))), parameters('subnetId'), json('null'))]"
+            }
+        }
+    ],
+    "outputs": {
+    }
+}
