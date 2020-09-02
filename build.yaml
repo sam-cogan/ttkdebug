@@ -10,3 +10,8 @@ jobs:
     inputs:
       templatelocation: '$(System.DefaultWorkingDirectory)'
       resultLocation: '$(System.DefaultWorkingDirectory)'
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: 'NUnit'
+      testResultsFiles: '$(System.DefaultWorkingDirectory)\*-armttk.xml'
+    condition: always()
