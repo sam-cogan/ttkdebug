@@ -1,0 +1,12 @@
+trigger: none
+
+pool:
+  vmImage: windows-latest
+
+jobs:
+- job: TestARMTTK
+  steps:
+  - task: RunARMTTKTests@1
+    inputs:
+      templatelocation: '$(System.DefaultWorkingDirectory)'
+      resultLocation: '$(System.DefaultWorkingDirectory)'
