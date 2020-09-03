@@ -1,0 +1,169 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "emailActionGroupName": {
+      "type": "string",
+      "metadata": {
+        "description": "Unique name (within the Resource Group) for the email Action group."
+      }
+    },
+    "emailActionGroupShortName": {
+      "type": "string",
+      "metadata": {
+        "description": "Short name (maximum 12 characters) for the email Action group."
+      }
+    },
+    "emailActionGroupEnabled": {
+      "type": "bool",
+      "metadata": {
+        "description": "Specify if the email action group is enabled."
+      },
+      "defaultValue": true
+    },
+    "emailAddresses": {
+      "type": "array",
+      "metadata": {
+        "description": "An array of email addresses where alerts will be sent to."
+      }
+    },
+    "logicAppActionGroupName": {
+      "type": "string",
+      "metadata": {
+        "description": "Unique name (within the Resource Group) for the logic app Action group."
+      }
+    },
+    "logicAppActionGroupShortName": {
+      "type": "string",
+      "metadata": {
+        "description": "Short name (maximum 12 characters) for the logic app Action group."
+      }
+    },
+    "logicAppActionGroupEnabled": {
+      "type": "bool",
+      "metadata": {
+        "description": "Specify if the logic app action group is enabled."
+      },
+      "defaultValue": true
+    },
+    "logicAppName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the Logic App."
+      }
+    },
+    "opsBridgeActionGroupName": {
+      "type": "string",
+      "metadata": {
+        "description": "Unique name (within the Resource Group) for the logic app Action group."
+      }
+    },
+    "opsBridgeActionGroupShortName": {
+      "type": "string",
+      "metadata": {
+        "description": "Short name (maximum 12 characters) for the logic app Action group."
+      }
+    },
+    "opsBridgeActionGroupEnabled": {
+      "type": "bool",
+      "metadata": {
+        "description": "Specify if the logic app action group is enabled."
+      },
+      "defaultValue": true
+    },
+    "opsBridgeEmailAddresses": {
+      "type": "array",
+      "metadata": {
+        "description": "An array of email addresses where alerts will be sent to."
+      }
+    },
+    "tagTeam": {
+      "type": "string",
+      "defaultValue": "Data Lake"
+    },
+    "tagStage": {
+      "type": "string",
+      "defaultValue": "Dev"
+    }
+  },
+  "variables": {
+    "copy": [
+      {
+        "name": "emailReceivers",
+        "count": "[length(parameters('emailAddresses'))]",        
+        "input": {
+          "name": "[concat('Email ', parameters('emailAddresses')[copyIndex('emailReceivers')])]",
+          "emailAddress": "[parameters('emailAddresses')[copyIndex('emailReceivers')]]",
+          "useCommonAlertSchema": "true"
+        }
+      },      
+      {
+        "name": "opsBridgeEmailReceivers",
+        "count": "[length(parameters('opsBridgeEmailAddresses'))]",        
+        "input": {
+          "name": "[concat('Email ', parameters('opsBridgeEmailAddresses')[copyIndex('opsBridgeEmailReceivers')])]",
+          "emailAddress": "[parameters('opsBridgeEmailAddresses')[copyIndex('opsBridgeEmailReceivers')]]",
+          "useCommonAlertSchema": "true"
+        }
+      }
+    ]
+  },
+  "resources": [
+    {
+      "name": "[parameters('emailActionGroupName')]",
+      "type": "microsoft.insights/actionGroups",
+      "apiVersion": "2019-06-01",
+      "location": "global",
+      "tags": {
+        "Team": "[parameters('tagTeam')]",
+        "Stage": "[parameters('tagStage')]",
+        "Platform": "Provisioning"
+      },
+      "properties": {
+        "groupShortName": "[parameters('emailActionGroupShortName')]",
+        "enabled": "[parameters('emailActionGroupEnabled')]",
+        "emailReceivers": "[variables('emailReceivers')]"
+      }
+    },
+    {
+      "name": "[parameters('opsBridgeActionGroupName')]",
+      "type": "microsoft.insights/actionGroups",
+      "apiVersion": "2019-06-01",
+      "location": "global",
+      "tags": {
+        "Team": "[parameters('tagTeam')]",
+        "Stage": "[parameters('tagStage')]",
+        "Platform": "Provisioning"
+      },
+      "properties": {
+        "groupShortName": "[parameters('opsBridgeActionGroupShortName')]",
+        "enabled": "[parameters('opsBridgeActionGroupEnabled')]",
+        "emailReceivers": "[variables('opsBridgeEmailReceivers')]"
+      }
+    },
+    {
+      "name": "[parameters('logicAppActionGroupName')]",
+      "type": "microsoft.insights/actionGroups",
+      "apiVersion": "2019-06-01",
+      "location": "global",
+      "tags": {
+        "Team": "[parameters('tagTeam')]",
+        "Stage": "[parameters('tagStage')]",
+        "Platform": "Provisioning"
+      },
+      "properties": {
+        "groupShortName": "[parameters('logicAppActionGroupShortName')]",
+        "enabled": "[parameters('logicAppActionGroupEnabled')]",
+        "logicAppReceivers": [
+          {
+            "name": "Logic App Action",
+            "resourceId": "[resourceId('Microsoft.Logic/workflows',parameters('logicAppName'))]",
+            "callbackUrl": "[listCallbackURL(concat(resourceId('Microsoft.Logic/workflows/', parameters('logicAppName')), '/triggers/manual'), '2016-10-01').value]",
+            "useCommonAlertSchema": "true"
+          }
+        ]
+      }
+    }
+  ],
+  "outputs": {}
+}
