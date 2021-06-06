@@ -6,7 +6,7 @@ pool:
 jobs:
 - job: TestARMTTK
   steps:
-  - task: RunARMTTKTests@1
+  - task: RunARMTTKTestsDev@1
     inputs:
       templatelocation: '$(System.DefaultWorkingDirectory)'
       resultLocation: '$(System.DefaultWorkingDirectory)\ARM-TTK.XML'
