@@ -9,7 +9,7 @@ jobs:
   - task: RunARMTTKTestsDev@1
     inputs:
       templatelocation: '$(System.DefaultWorkingDirectory)'
-      resultLocation: '$(System.DefaultWorkingDirectory)\ARM-TTK.XML'
+      resultLocation: '$(System.DefaultWorkingDirectory)\'
   - task: PublishTestResults@2
     inputs:
       testResultsFormat: 'NUnit'
